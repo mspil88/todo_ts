@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Todo List</title>
+        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    </head>
+    <body>
+        <div class="head-container">
+            <div class="date-container">
+                <p class="date date-day">Saturday, 13th</p>
+                <div class="month-remaining-tasks-row">
+                    <p class= "date date-month">August</p>
+                    <p class="remaining-tasks">5 tasks remaining</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="add-task-container">
+            <input class="add-task add-task-input"></input>
+            <input class="add-task add-task-date" type="date"></input>
+            <button class="add-task add-task-btn">+</button> 
+            <button class="add-task-act add-task-sort">Sort</button> 
+            <button class="add-task-act add-task-todo">Todo</button>
+            <button class="add-task-act add-task-done">Done</button>  
+        </div>
+
+        <div class="todoList-container">
+            <div class="todoItem">
+                <p class="todoItem-name">Washing</p>
+                <i class="fas fa-check-circle fa-lg"></i>
+                <i class="fas fa-wrench fa-lg"></i>
+                <i class="fas fa-trash fa-lg"></i>
+            </div>
+
+            <div class="todoItem">
+                <p class="todoItem-name">Bins</p>
+                <i class="fas fa-check-circle fa-lg"></i>
+                <i class="fas fa-wrench fa-lg"></i>
+                <i class="fas fa-trash fa-lg"></i>
+            </div>
+        </div>
+
+        </div>
+    <script src="bundle.js"></script>
+    </body>
+</html>
