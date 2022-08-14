@@ -96,17 +96,43 @@ export class Todo {
     }
 }
 
+function* returnID() {
+    let idx = 0;
+    while(true) {
+        yield idx++;
+    }
+}
+
 export class TodoList<T extends Todo> {
-    private tasksMap: Map<number, T>;
+    private tasksMap: Map<number, Todo>;
     public listElement: HTMLElement;
     public todoElements: HTMLElement[];
+    public addTaskButton: HTMLButtonElement;
+    private id;
 
     constructor(tasks: T[], listElement: HTMLElement) {
         this.tasksMap = new Map();
         this.listElement = listElement;
         this.todoElements = [];
-        tasks.forEach(task => this.tasksMap.set(task.getTaskId(), task));
+        this.addTaskButton = document.querySelector(".add-task-btn");
+        // tasks.forEach(task => this.tasksMap.set(task.getTaskId(), task));
+        this.id = returnID();
 
+        this.addTaskButton.addEventListener("click", ()=> {
+            const taskName: HTMLInputElement = document.querySelector(".add-task-input")
+            const taskDate: HTMLInputElement  = document.querySelector(".add-task-date")
+            console.log({name: taskName.value, date: taskDate.value})
+            const id = this.addTask(taskName.value, taskDate.value);
+            this.createTaskElement(id);
+            this.addEventListenersToElem();
+        })
+    }
+
+    addTask(taskName: string, taskDate: string): number {
+        const taskId = this.id.next().value
+        let task: Todo = new Todo(taskId, taskName, "InProgress", taskDate, "high");
+        this.tasksMap.set(taskId, task);
+        return taskId;
     }
 
     getList(): Todo[] {
@@ -141,11 +167,19 @@ export class TodoList<T extends Todo> {
     }
 
     createTaskElements(): HTMLElement {
+        
         [...this.tasksMap.values()].forEach(itm => {
             const elem: HTMLElement = itm.createElement();
             appendTaskDiv(this.listElement, elem);
             this.todoElements.push(elem)
         })
+        return;
+    }
+
+    createTaskElement(id: number): HTMLElement {
+        const elem: HTMLElement = this.tasksMap.get(id).createElement();
+        appendTaskDiv(this.listElement, elem);
+        this.todoElements.push(elem)
         return;
     }
 
@@ -156,6 +190,11 @@ export class TodoList<T extends Todo> {
             addListener(e);
         })
         return;
+    }
+
+    addEventListenersToElem(): EventListener {
+        addListener(this.todoElements[this.todoElements.length-1])
+        return; 
     }
 
 }

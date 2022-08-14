@@ -39,6 +39,7 @@ export function completeListener(elem: HTMLElement): HTMLElement {
     return;
 }
 
+
 export function addListener(elem: HTMLElement): HTMLElement {
     const elemId: string = elem.getAttribute("class").split("-")[1];
     
@@ -47,14 +48,20 @@ export function addListener(elem: HTMLElement): HTMLElement {
     const deleteElem = document.querySelector(`.delete-${elemId}`);
 
     completeElem.addEventListener("click", ()=> {
-        console.log(`complete-${elemId}`);
+        const elem: HTMLElement = document.querySelector(`.todo-name-${elemId}`);
+        if(elem.style.textDecorationLine === "none") {
+            elem.style.textDecorationLine = 'line-through';
+        } else {
+            elem.style.textDecorationLine = 'none';
+        }
     });
     
     editElem.addEventListener("click", ()=> {
         console.log(`edit-${elemId}`);
     });
     deleteElem.addEventListener("click", ()=> {
-        console.log(`delete-${elemId}`);
+        const elem: HTMLElement = document.querySelector(`.todo-${elemId}`);
+        elem.remove();
     });
     
     return;
