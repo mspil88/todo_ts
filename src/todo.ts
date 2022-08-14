@@ -25,6 +25,9 @@
 
 //consider getters setters in the todo list class instead of todo item?
 
+import {createTaskElem, appendTaskDiv, addListener} from "./test";
+
+
 export enum Status {
     Complete = "Complete",
     InProgress = "InProgress"
@@ -45,12 +48,17 @@ export enum TaskAttribute {
 
 export class Todo {
     constructor(private id: number, public name: string, public status: string, public todoDate: string, 
-        public importance: string) {
+        public importance: string, public completeListener: EventListener = undefined,
+        public editListener: EventListener = undefined, public deleteListener: EventListener = undefined) {
             this.id = id;
             this.name = name;
             this.status = status;
             this.todoDate = todoDate;
             this.importance = importance;
+            this.completeListener = completeListener;
+            this.editListener = editListener;
+            this.deleteListener = deleteListener;
+            
     }
 
     getTask(): object {
@@ -81,13 +89,22 @@ export class Todo {
         const importanceVal : string = Importance[importance] !== undefined ? Importance[importance]: Importance.Medium
         this.importance = importanceVal
     }
+
+    createElement(): HTMLElement {
+        const elem = createTaskElem(this.getTaskId(), this.name);
+        return elem;
+    }
 }
 
 export class TodoList<T extends Todo> {
     private tasksMap: Map<number, T>;
+    public listElement: HTMLElement;
+    public todoElements: HTMLElement[];
 
-    constructor(tasks: T[]) {
+    constructor(tasks: T[], listElement: HTMLElement) {
         this.tasksMap = new Map();
+        this.listElement = listElement;
+        this.todoElements = [];
         tasks.forEach(task => this.tasksMap.set(task.getTaskId(), task));
 
     }
@@ -120,6 +137,25 @@ export class TodoList<T extends Todo> {
     countRemainingTasks(): number {
         return [...this.tasksMap.values()]
                .filter(task => task.status !== "Complete")
-               .length;
+               .length;           
     }
+
+    createTaskElements(): HTMLElement {
+        [...this.tasksMap.values()].forEach(itm => {
+            const elem: HTMLElement = itm.createElement();
+            appendTaskDiv(this.listElement, elem);
+            this.todoElements.push(elem)
+        })
+        return;
+    }
+
+    addEventListeners(): EventListener {
+        
+        this.todoElements.forEach(e => {
+            console.log(e)
+            addListener(e);
+        })
+        return;
+    }
+
 }
