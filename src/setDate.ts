@@ -23,15 +23,28 @@ let monMap = new Map<string, string>([
     ["Dec", "December"],
 ])
 
+let prefixMap = new Map<string, string>([
+    ["1", "st"],
+    ["2", "nd"],
+    ["3", "rd"],
+    ["21", "st"],
+    ["22", "nd"],
+    ["23", "rd"],
+    ["31", "st"],
+])
+
+function getDatePrefix(dayNumber:string): string {
+    const num: number = Number(dayNumber);
+    
+    if(prefixMap.has(dayNumber)) {
+        return prefixMap.get(dayNumber)
+    }
+    return "th"
+}
+
 export function setDate(dayElem: HTMLElement, monthElem: HTMLElement): void {
     const [dayText, month, dayNum]: string[] = new Date().toString().split(" ").slice(0, 3);
-    const daySuffix: string = Number(dayNum) == 1
-                              ? "st"
-                              : Number(dayNum) == 2 
-                              ? "nd"
-                              : Number(dayNum) == 3
-                              ? "rd"
-                              : "th"
+    const daySuffix = getDatePrefix(dayNum)
     dayElem.textContent = `${dayMap.get(dayText)}, ${dayNum}${daySuffix}`
     monthElem.textContent = `${monMap.get(month)}`
 }
