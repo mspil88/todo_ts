@@ -1,4 +1,5 @@
 import {Todo, TodoList, Status, Importance} from "./todo";
+import {setDate} from "./setDate";
 
 
 let test: Todo[] = [new Todo(1, "take out bins", "InProgress", "12/08/2021", "medium"),
@@ -12,6 +13,11 @@ list.taskCompleted(3);
 console.log(`Remaning Tasks ${list.countRemainingTasks()}`)
 list.taskCompleted(2);
 console.log(`Remaning Tasks ${list.countRemainingTasks()}`)
+
+const dayElem: HTMLParagraphElement = document.querySelector(".date-day");
+const monthElem: HTMLParagraphElement = document.querySelector(".date-month");
+
+setDate(dayElem, monthElem);
 
 // console.log(list.getList())
 // list.changeTaskAttribute(3, "importance", "High")
