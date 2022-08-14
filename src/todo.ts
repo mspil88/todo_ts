@@ -76,6 +76,10 @@ export class Todo {
         this.status = Status.Complete;
     }
 
+    setInProgress(): void {
+        this.status = Status.InProgress;
+    }
+
     setName(newName: string): void {
         this.name = newName
     }
@@ -105,9 +109,12 @@ function* returnID() {
 
 export class TodoList<T extends Todo> {
     private tasksMap: Map<number, Todo>;
-    public listElement: HTMLElement;
+    public listElement: any;
     public todoElements: HTMLElement[];
     public addTaskButton: HTMLButtonElement;
+    public todoBtn: HTMLButtonElement;
+    public doneBtn: HTMLButtonElement;
+    public allBtn: HTMLButtonElement;
     private id;
 
     constructor(tasks: T[], listElement: HTMLElement) {
@@ -117,6 +124,9 @@ export class TodoList<T extends Todo> {
         this.addTaskButton = document.querySelector(".add-task-btn");
         // tasks.forEach(task => this.tasksMap.set(task.getTaskId(), task));
         this.id = returnID();
+        this.todoBtn = document.querySelector(".add-task-todo")
+        this.doneBtn = document.querySelector(".add-task-done")
+        this.allBtn = document.querySelector(".add-task-all")
 
         this.addTaskButton.addEventListener("click", ()=> {
             const taskName: HTMLInputElement = document.querySelector(".add-task-input")
@@ -125,6 +135,22 @@ export class TodoList<T extends Todo> {
             const id = this.addTask(taskName.value, taskDate.value);
             this.createTaskElement(id);
             this.addEventListenersToElem();
+        })
+
+        this.todoBtn.addEventListener("click", ()=> {
+            console.log("todo");
+            this.renderfiltered("InProgress")
+        })
+
+        this.doneBtn.addEventListener("click", ()=> {
+            console.log("todo");
+            this.renderfiltered("Complete")
+        })
+
+        this.allBtn.addEventListener("click", ()=> {
+            console.log("All");
+            this.renderfiltered("All")
+            
         })
     }
 
@@ -161,9 +187,25 @@ export class TodoList<T extends Todo> {
     }
 
     countRemainingTasks(): number {
-        return [...this.tasksMap.values()]
-               .filter(task => task.status !== "Complete")
+        return this.filterStatus("InProgress")
                .length;           
+    }
+
+    filterStatus(status: string): Todo[]{
+        return [...this.tasksMap.values()]
+               .filter(task => task.status === status)
+    }
+
+    renderfiltered(status: string): HTMLElement {
+        let filtered = status === "All" ? [...this.tasksMap.values()] : this.filterStatus(status)
+        let filteredElems: HTMLElement[] = []
+        filtered.forEach(task => {
+            const elem: HTMLElement = task.createElement();
+            filteredElems.push(elem);
+        })
+
+        this.listElement.replaceChildren(...filteredElems);
+        return;
     }
 
     createTaskElements(): HTMLElement {
@@ -191,9 +233,39 @@ export class TodoList<T extends Todo> {
         })
         return;
     }
-
+    //clean up
     addEventListenersToElem(): EventListener {
-        addListener(this.todoElements[this.todoElements.length-1])
+        
+        const elemId: string = this.todoElements[this.todoElements.length-1].getAttribute("class").split("-")[1];
+    
+        const completeElem = document.querySelector(`.complete-${elemId}`);
+        const editElem = document.querySelector(`.edit-${elemId}`);
+        const deleteElem = document.querySelector(`.delete-${elemId}`);
+
+        completeElem.addEventListener("click", ()=> {
+            const elem: HTMLElement = document.querySelector(`.todo-name-${elemId}`);
+            if(elem.style.textDecorationLine === "none") {
+                elem.style.textDecorationLine = 'line-through';
+                this.tasksMap.get(Number(elemId)).markedCompleted();
+                console.log(this.tasksMap.get(Number(elemId)))
+            } else {
+                elem.style.textDecorationLine = 'none';
+                this.tasksMap.get(Number(elemId)).setInProgress();
+                console.log(this.tasksMap.get(Number(elemId)))
+            }
+        });
+        
+        editElem.addEventListener("click", ()=> {
+            console.log(`edit-${elemId}`);
+        });
+        
+        deleteElem.addEventListener("click", ()=> {
+            const elem: HTMLElement = document.querySelector(`.todo-${elemId}`);
+            elem.remove();
+            this.tasksMap.delete(Number(elemId))
+        });
+    
+
         return; 
     }
 

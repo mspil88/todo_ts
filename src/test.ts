@@ -39,7 +39,7 @@ export function completeListener(elem: HTMLElement): HTMLElement {
     return;
 }
 
-
+//probably needs adding to the class
 export function addListener(elem: HTMLElement): HTMLElement {
     const elemId: string = elem.getAttribute("class").split("-")[1];
     
@@ -51,6 +51,7 @@ export function addListener(elem: HTMLElement): HTMLElement {
         const elem: HTMLElement = document.querySelector(`.todo-name-${elemId}`);
         if(elem.style.textDecorationLine === "none") {
             elem.style.textDecorationLine = 'line-through';
+            console.log(this)
         } else {
             elem.style.textDecorationLine = 'none';
         }
