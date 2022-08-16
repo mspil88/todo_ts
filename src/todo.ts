@@ -100,11 +100,19 @@ export class Todo {
     }
 }
 
-function* returnID() {
-    let idx = 0;
+function* returnID(index: number = 0) {
+    let idx = index;
     while(true) {
         yield idx++;
     }
+}
+
+function setLocalStorage(todos: Todo[]): void {
+    localStorage.setItem("todos", JSON.stringify(todos))
+}
+
+function getLocalStorage(): string {
+    return JSON.parse(localStorage.getItem("todos"));
 }
 
 enum RenderStatus {
@@ -113,6 +121,8 @@ enum RenderStatus {
     Complete = "Complete",
     Sorted = "Sorted"
 }
+
+
 
 export class TodoList<T extends Todo> {
     private tasksMap: Map<number, Todo>;
@@ -145,6 +155,7 @@ export class TodoList<T extends Todo> {
             const id = this.addTask(taskName.value, taskDate.value);
             this.createTaskElement(id);
             this.addEventListenersToElem();
+            this.setTasksInLocalStorage();
         })
 
         this.todoBtn.addEventListener("click", ()=> {
@@ -165,7 +176,12 @@ export class TodoList<T extends Todo> {
         this.sortBtn.addEventListener("click", ()=> {
             console.log("sort");
             this.renderfiltered("Sorted")
+            this.setTasksInLocalStorage()
         })
+    }
+
+    setTasksInLocalStorage(): void {
+        setLocalStorage([...this.tasksMap.values()])
     }
 
     addTask(taskName: string, taskDate: string): number {
@@ -294,7 +310,8 @@ export class TodoList<T extends Todo> {
         deleteElem.addEventListener("click", ()=> {
             const elem: HTMLElement = document.querySelector(`.todo-${elemId}`);
             elem.remove();
-            this.tasksMap.delete(Number(elemId))
+            this.tasksMap.delete(Number(elemId));
+            this.setTasksInLocalStorage();
         });
     
 
