@@ -107,6 +107,13 @@ function* returnID() {
     }
 }
 
+enum RenderStatus {
+    All = "All",
+    InProgress = "InProgress",
+    Complete = "Complete",
+    Sorted = "Sorted"
+}
+
 export class TodoList<T extends Todo> {
     private tasksMap: Map<number, Todo>;
     public listElement: any;
@@ -115,6 +122,7 @@ export class TodoList<T extends Todo> {
     public todoBtn: HTMLButtonElement;
     public doneBtn: HTMLButtonElement;
     public allBtn: HTMLButtonElement;
+    public sortBtn: HTMLButtonElement;
     private id;
 
     constructor(tasks: T[], listElement: HTMLElement) {
@@ -127,6 +135,8 @@ export class TodoList<T extends Todo> {
         this.todoBtn = document.querySelector(".add-task-todo")
         this.doneBtn = document.querySelector(".add-task-done")
         this.allBtn = document.querySelector(".add-task-all")
+        this.sortBtn = document.querySelector(".add-task-sort")
+
 
         this.addTaskButton.addEventListener("click", ()=> {
             const taskName: HTMLInputElement = document.querySelector(".add-task-input")
@@ -151,6 +161,10 @@ export class TodoList<T extends Todo> {
             console.log("All");
             this.renderfiltered("All")
             
+        })
+        this.sortBtn.addEventListener("click", ()=> {
+            console.log("sort");
+            this.renderfiltered("Sorted")
         })
     }
 
@@ -196,8 +210,26 @@ export class TodoList<T extends Todo> {
                .filter(task => task.status === status)
     }
 
+    sortByDate(): Todo[] {
+            let taskArray: Todo[] = [...this.tasksMap.values()] 
+            console.log("before")
+            console.log(taskArray);
+            taskArray.sort((a, b) => {
+                return new Date(a.todoDate).valueOf() -  new Date(b.todoDate).valueOf()
+               })
+            console.log("after")
+            console.log(taskArray);
+            return taskArray;
+    }
+    
     renderfiltered(status: string): HTMLElement {
-        let filtered = status === "All" ? [...this.tasksMap.values()] : this.filterStatus(status)
+        // let filtered = status === RenderStatus.All ? [...this.tasksMap.values()] : this.filterStatus(status)
+        console.log(`STATUS: ${status}`)
+        let filtered = status === RenderStatus.All ? [...this.tasksMap.values()] :
+                       status === RenderStatus.Sorted ? this.sortByDate()
+                       : this.filterStatus(status)
+        
+                  
         let filteredElems: HTMLElement[] = []
         filtered.forEach(task => {
             const elem: HTMLElement = task.createElement();
