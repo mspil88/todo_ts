@@ -111,9 +111,26 @@ function setLocalStorage(todos: Todo[]): void {
     localStorage.setItem("todos", JSON.stringify(todos))
 }
 
-function getLocalStorage(): string {
+function getLocalStorage(): Object[] {
     return JSON.parse(localStorage.getItem("todos"));
 }
+
+function todosFromLocalStorage(): Todo[] | null {
+    console.log("LOCAL TODOS")
+    let localTodos = getLocalStorage();
+
+    if (localTodos) {
+        let todoArray = [];
+
+        localTodos.forEach(itm => {
+            todoArray.push(new Todo(itm["id"], itm["name"], itm["status"], 
+                                        itm["todoDate"], itm["importance"]))
+        })
+        return todoArray;
+    }    
+    return null;
+}
+
 
 enum RenderStatus {
     All = "All",
@@ -121,8 +138,6 @@ enum RenderStatus {
     Complete = "Complete",
     Sorted = "Sorted"
 }
-
-
 
 export class TodoList<T extends Todo> {
     private tasksMap: Map<number, Todo>;
@@ -146,6 +161,7 @@ export class TodoList<T extends Todo> {
         this.doneBtn = document.querySelector(".add-task-done")
         this.allBtn = document.querySelector(".add-task-all")
         this.sortBtn = document.querySelector(".add-task-sort")
+        this.addTasksFromLocal()
 
 
         this.addTaskButton.addEventListener("click", ()=> {
@@ -192,6 +208,17 @@ export class TodoList<T extends Todo> {
         let task: Todo = new Todo(taskId, taskName, "InProgress", taskDate, "high");
         this.tasksMap.set(taskId, task);
         return taskId;
+    }
+
+    addTasksFromLocal(): HTMLAllCollection {
+        let todos: Todo[] = todosFromLocalStorage();
+        todos.forEach(todo => {
+            const taskId: number = todo["id"];
+            this.tasksMap.set(taskId, todo);
+        })
+        this.createTaskElements();
+        this.addEventListenersToAllElems();
+        return;
     }
 
     getList(): Todo[] {

@@ -11,13 +11,8 @@ let test: Todo[] | undefined= [new Todo(1, "take out bins", "InProgress", "12/08
 const dayElem: HTMLParagraphElement = document.querySelector(".date-day");
 const monthElem: HTMLParagraphElement = document.querySelector(".date-month");
 const listContainer: HTMLDialogElement = document.querySelector(".todoList-container")
-// const addTaskBtn: HTMLButtonElement = document.querySelector(".add-task-btn")
-// const taskInput: HTMLInputElement = document.querySelector(".add-task-input")
-// const taskDate: HTMLInputElement = document.querySelector(".add-task-date")
 
 let list = new TodoList(test, listContainer);
 
 setDate(dayElem, monthElem);
-
-// list.createTaskElements();
-// list.addEventListeners();
+console.log(localStorage.getItem("todos"))
