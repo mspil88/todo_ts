@@ -107,6 +107,16 @@ function* returnID(index: number = 0) {
     }
 }
 
+function maxID(todos: Object[]): number {
+    let _max = 0;
+    for(let i of todos) {
+        if(i["id"] > _max) {
+            _max = i["id"]
+        }
+    }
+    return _max;
+}
+
 function setLocalStorage(todos: Todo[]): void {
     localStorage.setItem("todos", JSON.stringify(todos))
 }
@@ -207,11 +217,14 @@ export class TodoList<T extends Todo> {
         const taskId = this.id.next().value
         let task: Todo = new Todo(taskId, taskName, "InProgress", taskDate, "high");
         this.tasksMap.set(taskId, task);
+        console.log(this.tasksMap);
         return taskId;
     }
 
     addTasksFromLocal(): HTMLAllCollection {
         let todos: Todo[] = todosFromLocalStorage();
+        this.id = todos !== null ? returnID(maxID(todos)+1) : returnID(); 
+        
         todos.forEach(todo => {
             const taskId: number = todo["id"];
             this.tasksMap.set(taskId, todo);
