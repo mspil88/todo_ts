@@ -154,29 +154,32 @@ export class TodoList<T extends Todo> {
             console.log({name: taskName.value, date: taskDate.value})
             const id = this.addTask(taskName.value, taskDate.value);
             this.createTaskElement(id);
-            this.addEventListenersToElem();
+            this.addEventListenersToElem(this.todoElements[this.todoElements.length-1].getAttribute("class").split("-")[1]);
             this.setTasksInLocalStorage();
         })
 
         this.todoBtn.addEventListener("click", ()=> {
             console.log("todo");
-            this.renderfiltered("InProgress")
+            this.renderfiltered("InProgress");
+            
         })
 
         this.doneBtn.addEventListener("click", ()=> {
             console.log("todo");
-            this.renderfiltered("Complete")
+            this.renderfiltered("Complete");
+            
         })
 
         this.allBtn.addEventListener("click", ()=> {
             console.log("All");
-            this.renderfiltered("All")
+            this.renderfiltered("All");
             
         })
         this.sortBtn.addEventListener("click", ()=> {
             console.log("sort");
-            this.renderfiltered("Sorted")
-            this.setTasksInLocalStorage()
+            this.renderfiltered("Sorted");
+            
+            // this.setTasksInLocalStorage()
         })
     }
 
@@ -245,14 +248,19 @@ export class TodoList<T extends Todo> {
                        status === RenderStatus.Sorted ? this.sortByDate()
                        : this.filterStatus(status)
         
-                  
-        let filteredElems: HTMLElement[] = []
+        console.log(filtered);
+        // let filteredElems: HTMLElement[] = []
+        this.todoElements = [];
+
         filtered.forEach(task => {
             const elem: HTMLElement = task.createElement();
-            filteredElems.push(elem);
+            this.todoElements.push(elem);
+            
         })
 
-        this.listElement.replaceChildren(...filteredElems);
+        this.listElement.replaceChildren(...this.todoElements);
+        this.addEventListenersToAllElems();
+
         return;
     }
 
@@ -281,11 +289,22 @@ export class TodoList<T extends Todo> {
         })
         return;
     }
+
+    addEventListenersToAllElems(): EventListener {
+        console.log(this.todoElements)
+
+        this.todoElements.forEach(itm => {
+            const elemId: string = itm.getAttribute("class").split("-")[1];
+            this.addEventListenersToElem(elemId);    
+        })
+
+        return;
+    }
+
+
     //clean up
-    addEventListenersToElem(): EventListener {
+    addEventListenersToElem(elemId: string): EventListener {
         
-        const elemId: string = this.todoElements[this.todoElements.length-1].getAttribute("class").split("-")[1];
-    
         const completeElem = document.querySelector(`.complete-${elemId}`);
         const editElem = document.querySelector(`.edit-${elemId}`);
         const deleteElem = document.querySelector(`.delete-${elemId}`);
