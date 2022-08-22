@@ -112,6 +112,7 @@ body {
 .todoItem-name {
     font-family: var(--font);
     width: 80%;
+    text-decoration-line: none;
 }
 
 i {

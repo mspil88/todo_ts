@@ -25,6 +25,9 @@
 
 //consider getters setters in the todo list class instead of todo item?
 
+import {createTaskElem, appendTaskDiv, addListener} from "./test";
+
+
 export enum Status {
     Complete = "Complete",
     InProgress = "InProgress"
@@ -45,12 +48,17 @@ export enum TaskAttribute {
 
 export class Todo {
     constructor(private id: number, public name: string, public status: string, public todoDate: string, 
-        public importance: string) {
+        public importance: string, public completeListener: EventListener = undefined,
+        public editListener: EventListener = undefined, public deleteListener: EventListener = undefined) {
             this.id = id;
             this.name = name;
             this.status = status;
             this.todoDate = todoDate;
             this.importance = importance;
+            this.completeListener = completeListener;
+            this.editListener = editListener;
+            this.deleteListener = deleteListener;
+            
     }
 
     getTask(): object {
@@ -68,6 +76,10 @@ export class Todo {
         this.status = Status.Complete;
     }
 
+    setInProgress(): void {
+        this.status = Status.InProgress;
+    }
+
     setName(newName: string): void {
         this.name = newName
     }
@@ -81,15 +93,145 @@ export class Todo {
         const importanceVal : string = Importance[importance] !== undefined ? Importance[importance]: Importance.Medium
         this.importance = importanceVal
     }
+
+    createElement(): HTMLElement {
+        const elem = createTaskElem(this.getTaskId(), this.name);
+        return elem;
+    }
+}
+
+function* returnID(index: number = 0) {
+    let idx = index;
+    while(true) {
+        yield idx++;
+    }
+}
+
+function maxID(todos: Object[]): number {
+    let _max = 0;
+    for(let i of todos) {
+        if(i["id"] > _max) {
+            _max = i["id"]
+        }
+    }
+    return _max;
+}
+
+function setLocalStorage(todos: Todo[]): void {
+    localStorage.setItem("todos", JSON.stringify(todos))
+}
+
+function getLocalStorage(): Object[] {
+    return JSON.parse(localStorage.getItem("todos"));
+}
+
+function todosFromLocalStorage(): Todo[] | null {
+    console.log("LOCAL TODOS")
+    let localTodos = getLocalStorage();
+
+    if (localTodos) {
+        let todoArray = [];
+
+        localTodos.forEach(itm => {
+            todoArray.push(new Todo(itm["id"], itm["name"], itm["status"], 
+                                        itm["todoDate"], itm["importance"]))
+        })
+        return todoArray;
+    }    
+    return null;
+}
+
+
+enum RenderStatus {
+    All = "All",
+    InProgress = "InProgress",
+    Complete = "Complete",
+    Sorted = "Sorted"
 }
 
 export class TodoList<T extends Todo> {
-    private tasksMap: Map<number, T>;
+    private tasksMap: Map<number, Todo>;
+    public listElement: any;
+    public todoElements: HTMLElement[];
+    public addTaskButton: HTMLButtonElement;
+    public todoBtn: HTMLButtonElement;
+    public doneBtn: HTMLButtonElement;
+    public allBtn: HTMLButtonElement;
+    public sortBtn: HTMLButtonElement;
+    private id;
 
-    constructor(tasks: T[]) {
+    constructor(tasks: T[], listElement: HTMLElement) {
         this.tasksMap = new Map();
-        tasks.forEach(task => this.tasksMap.set(task.getTaskId(), task));
+        this.listElement = listElement;
+        this.todoElements = [];
+        this.addTaskButton = document.querySelector(".add-task-btn");
+        // tasks.forEach(task => this.tasksMap.set(task.getTaskId(), task));
+        this.id = returnID();
+        this.todoBtn = document.querySelector(".add-task-todo")
+        this.doneBtn = document.querySelector(".add-task-done")
+        this.allBtn = document.querySelector(".add-task-all")
+        this.sortBtn = document.querySelector(".add-task-sort")
+        this.addTasksFromLocal()
 
+
+        this.addTaskButton.addEventListener("click", ()=> {
+            const taskName: HTMLInputElement = document.querySelector(".add-task-input")
+            const taskDate: HTMLInputElement  = document.querySelector(".add-task-date")
+            console.log({name: taskName.value, date: taskDate.value})
+            const id = this.addTask(taskName.value, taskDate.value);
+            this.createTaskElement(id);
+            this.addEventListenersToElem(this.todoElements[this.todoElements.length-1].getAttribute("class").split("-")[1]);
+            this.setTasksInLocalStorage();
+        })
+
+        this.todoBtn.addEventListener("click", ()=> {
+            console.log("todo");
+            this.renderfiltered("InProgress");
+            
+        })
+
+        this.doneBtn.addEventListener("click", ()=> {
+            console.log("todo");
+            this.renderfiltered("Complete");
+            
+        })
+
+        this.allBtn.addEventListener("click", ()=> {
+            console.log("All");
+            this.renderfiltered("All");
+            
+        })
+        this.sortBtn.addEventListener("click", ()=> {
+            console.log("sort");
+            this.renderfiltered("Sorted");
+            
+            // this.setTasksInLocalStorage()
+        })
+    }
+
+    setTasksInLocalStorage(): void {
+        setLocalStorage([...this.tasksMap.values()])
+    }
+
+    addTask(taskName: string, taskDate: string): number {
+        const taskId = this.id.next().value
+        let task: Todo = new Todo(taskId, taskName, "InProgress", taskDate, "high");
+        this.tasksMap.set(taskId, task);
+        console.log(this.tasksMap);
+        return taskId;
+    }
+
+    addTasksFromLocal(): HTMLAllCollection {
+        let todos: Todo[] = todosFromLocalStorage();
+        this.id = todos !== null ? returnID(maxID(todos)+1) : returnID(); 
+        
+        todos.forEach(todo => {
+            const taskId: number = todo["id"];
+            this.tasksMap.set(taskId, todo);
+        })
+        this.createTaskElements();
+        this.addEventListenersToAllElems();
+        return;
     }
 
     getList(): Todo[] {
@@ -118,8 +260,121 @@ export class TodoList<T extends Todo> {
     }
 
     countRemainingTasks(): number {
-        return [...this.tasksMap.values()]
-               .filter(task => task.status !== "Complete")
-               .length;
+        return this.filterStatus("InProgress")
+               .length;           
     }
+
+    filterStatus(status: string): Todo[]{
+        return [...this.tasksMap.values()]
+               .filter(task => task.status === status)
+    }
+
+    sortByDate(): Todo[] {
+            let taskArray: Todo[] = [...this.tasksMap.values()] 
+            console.log("before")
+            console.log(taskArray);
+            taskArray.sort((a, b) => {
+                return new Date(a.todoDate).valueOf() -  new Date(b.todoDate).valueOf()
+               })
+            console.log("after")
+            console.log(taskArray);
+            return taskArray;
+    }
+    
+    renderfiltered(status: string): HTMLElement {
+        // let filtered = status === RenderStatus.All ? [...this.tasksMap.values()] : this.filterStatus(status)
+        console.log(`STATUS: ${status}`)
+        let filtered = status === RenderStatus.All ? [...this.tasksMap.values()] :
+                       status === RenderStatus.Sorted ? this.sortByDate()
+                       : this.filterStatus(status)
+        
+        console.log(filtered);
+        // let filteredElems: HTMLElement[] = []
+        this.todoElements = [];
+
+        filtered.forEach(task => {
+            const elem: HTMLElement = task.createElement();
+            this.todoElements.push(elem);
+            
+        })
+
+        this.listElement.replaceChildren(...this.todoElements);
+        this.addEventListenersToAllElems();
+
+        return;
+    }
+
+    createTaskElements(): HTMLElement {
+        
+        [...this.tasksMap.values()].forEach(itm => {
+            const elem: HTMLElement = itm.createElement();
+            appendTaskDiv(this.listElement, elem);
+            this.todoElements.push(elem)
+        })
+        return;
+    }
+
+    createTaskElement(id: number): HTMLElement {
+        const elem: HTMLElement = this.tasksMap.get(id).createElement();
+        appendTaskDiv(this.listElement, elem);
+        this.todoElements.push(elem)
+        return;
+    }
+
+    addEventListeners(): EventListener {
+        
+        this.todoElements.forEach(e => {
+            console.log(e)
+            addListener(e);
+        })
+        return;
+    }
+
+    addEventListenersToAllElems(): EventListener {
+        console.log(this.todoElements)
+
+        this.todoElements.forEach(itm => {
+            const elemId: string = itm.getAttribute("class").split("-")[1];
+            this.addEventListenersToElem(elemId);    
+        })
+
+        return;
+    }
+
+
+    //clean up
+    addEventListenersToElem(elemId: string): EventListener {
+        
+        const completeElem = document.querySelector(`.complete-${elemId}`);
+        const editElem = document.querySelector(`.edit-${elemId}`);
+        const deleteElem = document.querySelector(`.delete-${elemId}`);
+
+        completeElem.addEventListener("click", ()=> {
+            const elem: HTMLElement = document.querySelector(`.todo-name-${elemId}`);
+            if(elem.style.textDecorationLine === "none") {
+                elem.style.textDecorationLine = 'line-through';
+                this.tasksMap.get(Number(elemId)).markedCompleted();
+                console.log(this.tasksMap.get(Number(elemId)))
+            } else {
+                elem.style.textDecorationLine = 'none';
+                this.tasksMap.get(Number(elemId)).setInProgress();
+                console.log(this.tasksMap.get(Number(elemId)))
+            }
+        });
+        
+        editElem.addEventListener("click", ()=> {
+            console.log(`edit-${elemId}`);
+        });
+        
+        deleteElem.addEventListener("click", ()=> {
+            const elem: HTMLElement = document.querySelector(`.todo-${elemId}`);
+            elem.remove();
+            this.tasksMap.delete(Number(elemId));
+            this.setTasksInLocalStorage();
+        });
+    
+
+        return; 
+    }
+
 }
