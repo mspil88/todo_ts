@@ -158,6 +158,7 @@ export class TodoList<T extends Todo> {
     public doneBtn: HTMLButtonElement;
     public allBtn: HTMLButtonElement;
     public sortBtn: HTMLButtonElement;
+    public remainingTodos: HTMLParagraphElement;
     private id;
 
     constructor(tasks: T[], listElement: HTMLElement) {
@@ -171,6 +172,7 @@ export class TodoList<T extends Todo> {
         this.doneBtn = document.querySelector(".add-task-done")
         this.allBtn = document.querySelector(".add-task-all")
         this.sortBtn = document.querySelector(".add-task-sort")
+        this.remainingTodos = document.querySelector(".remaining-tasks")
         this.addTasksFromLocal()
 
 
@@ -250,6 +252,12 @@ export class TodoList<T extends Todo> {
         return taskId;
     }
 
+    setRemainingTasks(): HTMLElement {
+        const remainingTodos = this.countRemainingTasks() | 0;
+        this.remainingTodos.textContent = `${remainingTodos} todos remaining`;
+        return;
+    }
+
     addTasksFromLocal(): HTMLAllCollection {
         let todos: Todo[] = todosFromLocalStorage();
         this.id = todos !== null ? returnID(maxID(todos)+1) : returnID(); 
@@ -260,6 +268,7 @@ export class TodoList<T extends Todo> {
         })
         this.createTaskElements();
         this.addEventListenersToAllElems();
+        this.setRemainingTasks();
         return;
     }
 
@@ -383,10 +392,12 @@ export class TodoList<T extends Todo> {
             if(elem.style.textDecorationLine === "none") {
                 elem.style.textDecorationLine = 'line-through';
                 this.tasksMap.get(Number(elemId)).markedCompleted();
+                this.setRemainingTasks();
                 console.log(this.tasksMap.get(Number(elemId)))
             } else {
                 elem.style.textDecorationLine = 'none';
                 this.tasksMap.get(Number(elemId)).setInProgress();
+                this.setRemainingTasks();
                 console.log(this.tasksMap.get(Number(elemId)))
             }
         });
@@ -399,6 +410,7 @@ export class TodoList<T extends Todo> {
             const elem: HTMLElement = document.querySelector(`.todo-${elemId}`);
             elem.remove();
             this.tasksMap.delete(Number(elemId));
+            this.setRemainingTasks();
             this.setTasksInLocalStorage();
         });
     
