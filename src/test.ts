@@ -39,6 +39,15 @@ export function completeListener(elem: HTMLElement): HTMLElement {
     return;
 }
 
+enum BtnTypes {
+    sort = "sort",
+    todo = "todo",
+    done = "done",
+    all = "all"
+}
+
+
+
 //probably needs adding to the class
 export function addListener(elem: HTMLElement): HTMLElement {
     const elemId: string = elem.getAttribute("class").split("-")[1];

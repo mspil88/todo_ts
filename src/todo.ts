@@ -184,21 +184,50 @@ export class TodoList<T extends Todo> {
             this.setTasksInLocalStorage();
         })
 
+
+        //refactor colour changes too messy
         this.todoBtn.addEventListener("click", ()=> {
             console.log("todo");
             this.renderfiltered("InProgress");
+            
+            this.todoBtn.style.backgroundColor = "white";
+            this.todoBtn.style.color = "black";
+
+            this.doneBtn.style.backgroundColor = "black";
+            this.doneBtn.style.color = "white";
+
+            this.allBtn.style.backgroundColor = "black";
+            this.allBtn.style.color = "white";
             
         })
 
         this.doneBtn.addEventListener("click", ()=> {
             console.log("todo");
             this.renderfiltered("Complete");
+
+            this.todoBtn.style.backgroundColor = "black";
+            this.todoBtn.style.color = "white";
+
+            this.doneBtn.style.backgroundColor = "white";
+            this.doneBtn.style.color = "black";
+
+            this.allBtn.style.backgroundColor = "black";
+            this.allBtn.style.color = "white"
             
         })
 
         this.allBtn.addEventListener("click", ()=> {
             console.log("All");
             this.renderfiltered("All");
+
+            this.todoBtn.style.backgroundColor = "black";
+            this.todoBtn.style.color = "white";
+
+            this.doneBtn.style.backgroundColor = "black";
+            this.doneBtn.style.color = "white";
+
+            this.allBtn.style.backgroundColor = "white";
+            this.allBtn.style.color = "black"
             
         })
         this.sortBtn.addEventListener("click", ()=> {
