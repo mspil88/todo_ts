@@ -200,6 +200,9 @@ export class TodoList<T extends Todo> {
 
             this.allBtn.style.backgroundColor = "black";
             this.allBtn.style.color = "white";
+
+            this.sortBtn.style.backgroundColor = "black";
+            this.sortBtn.style.color = "white";
             
         })
 
@@ -216,6 +219,8 @@ export class TodoList<T extends Todo> {
             this.allBtn.style.backgroundColor = "black";
             this.allBtn.style.color = "white"
             
+            this.sortBtn.style.backgroundColor = "black";
+            this.sortBtn.style.color = "white";
         })
 
         this.allBtn.addEventListener("click", ()=> {
@@ -230,11 +235,26 @@ export class TodoList<T extends Todo> {
 
             this.allBtn.style.backgroundColor = "white";
             this.allBtn.style.color = "black"
+
+            this.sortBtn.style.backgroundColor = "black";
+            this.sortBtn.style.color = "white";
             
         })
         this.sortBtn.addEventListener("click", ()=> {
             console.log("sort");
             this.renderfiltered("Sorted");
+
+            this.todoBtn.style.backgroundColor = "black";
+            this.todoBtn.style.color = "white";
+
+            this.doneBtn.style.backgroundColor = "black";
+            this.doneBtn.style.color = "white";
+
+            this.allBtn.style.backgroundColor = "black";
+            this.allBtn.style.color = "white"
+
+            this.sortBtn.style.backgroundColor = "white";
+            this.sortBtn.style.color = "black";
             
             // this.setTasksInLocalStorage()
         })
@@ -332,13 +352,25 @@ export class TodoList<T extends Todo> {
 
         filtered.forEach(task => {
             const elem: HTMLElement = task.createElement();
-            this.todoElements.push(elem);
             
+            this.todoElements.push(elem);
         })
+
 
         this.listElement.replaceChildren(...this.todoElements);
         this.addEventListenersToAllElems();
+        this.markCompleted(filtered);
 
+        return;
+    }
+
+    markCompleted(filtered: Todo[]): HTMLElement {
+        filtered.forEach(itm => {
+            if(itm.status === RenderStatus.Complete) {
+                const elemName: HTMLElement = document.querySelector(`.todo-name-${itm.getTaskId()}`);
+                elemName.style.textDecorationLine = 'line-through';
+            }
+        })
         return;
     }
 
@@ -347,6 +379,10 @@ export class TodoList<T extends Todo> {
         [...this.tasksMap.values()].forEach(itm => {
             const elem: HTMLElement = itm.createElement();
             appendTaskDiv(this.listElement, elem);
+            const elemName: HTMLElement = document.querySelector(`.todo-name-${itm.getTaskId()}`);
+            if(itm.status === RenderStatus.Complete) {
+                elemName.style.textDecorationLine = 'line-through';
+            }
             this.todoElements.push(elem)
         })
         return;
@@ -393,11 +429,13 @@ export class TodoList<T extends Todo> {
                 elem.style.textDecorationLine = 'line-through';
                 this.tasksMap.get(Number(elemId)).markedCompleted();
                 this.setRemainingTasks();
+                this.setTasksInLocalStorage();
                 console.log(this.tasksMap.get(Number(elemId)))
             } else {
                 elem.style.textDecorationLine = 'none';
                 this.tasksMap.get(Number(elemId)).setInProgress();
                 this.setRemainingTasks();
+                this.setTasksInLocalStorage();
                 console.log(this.tasksMap.get(Number(elemId)))
             }
         });
