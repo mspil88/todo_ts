@@ -25,6 +25,15 @@
 
 //consider getters setters in the todo list class instead of todo item?
 
+
+//bugs 
+//(1) sort not really working - should be done on basis of remaining days
+//(2) todos remaining needs to be updated whenever a single task is created
+
+//todos
+//(1) add importance to app and color
+//(2) tool tips on each div
+
 import {createTaskElem, appendTaskDiv, addListener} from "./test";
 
 
@@ -269,6 +278,7 @@ export class TodoList<T extends Todo> {
         let task: Todo = new Todo(taskId, taskName, "InProgress", taskDate, "high");
         this.tasksMap.set(taskId, task);
         console.log(this.tasksMap);
+        this.setRemainingTasks();
         return taskId;
     }
 
