@@ -16,7 +16,7 @@ body {
 .head-container, .add-task-container {
     /* border: 1px solid rgba(0, 0, 0, 0.8); */
     padding:0 10px 0 10px;
-    min-width: 400px;
+    min-width: 600px;
 }
 
 .head-container {
@@ -76,13 +76,15 @@ body {
     margin: 0;
     padding-left: 10px;
     margin-right: 10px;
+    /* min-width: 300px; */
 }
 
-.add-task-date {
+.add-task-date, .add-task-importance {
     margin-right: 10px;
+    min-width: 100px;
 }
 
-.add-task-input:focus {
+.add-task-input:focus, .add-task-importance  {
     outline: none;
 }
 
@@ -91,6 +93,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    min-width: 600px;
 }
 
 .todoItem {
