@@ -188,8 +188,9 @@ export class TodoList<T extends Todo> {
         this.addTaskButton.addEventListener("click", ()=> {
             const taskName: HTMLInputElement = document.querySelector(".add-task-input")
             const taskDate: HTMLInputElement  = document.querySelector(".add-task-date")
-            console.log({name: taskName.value, date: taskDate.value})
-            const id = this.addTask(taskName.value, taskDate.value);
+            const taskImportance: HTMLSelectElement = document.querySelector(".add-task-importance")
+            const taskImportanceValue = taskImportance.options[taskImportance.selectedIndex]
+            const id = this.addTask(taskName.value, taskDate.value, taskImportanceValue.value);
             this.createTaskElement(id);
             this.addEventListenersToElem(this.todoElements[this.todoElements.length-1].getAttribute("class").split("-")[1]);
             this.setTasksInLocalStorage();
@@ -273,9 +274,9 @@ export class TodoList<T extends Todo> {
         setLocalStorage([...this.tasksMap.values()])
     }
 
-    addTask(taskName: string, taskDate: string): number {
+    addTask(taskName: string, taskDate: string, importance: string): number {
         const taskId = this.id.next().value
-        let task: Todo = new Todo(taskId, taskName, "InProgress", taskDate, "high");
+        let task: Todo = new Todo(taskId, taskName, "InProgress", taskDate, importance);
         this.tasksMap.set(taskId, task);
         console.log(this.tasksMap);
         this.setRemainingTasks();
@@ -285,6 +286,16 @@ export class TodoList<T extends Todo> {
     setRemainingTasks(): HTMLElement {
         const remainingTodos = this.countRemainingTasks() | 0;
         this.remainingTodos.textContent = `${remainingTodos} todos remaining`;
+        return;
+    }
+
+    flagHighImportance(filtered: Todo[]): HTMLElement {
+        filtered.forEach(itm => {
+            if(itm.importance === Importance.High) {
+                const elemName: HTMLElement = document.querySelector(`.todo-${itm.getTaskId()}`);
+                elemName.style.borderLeft = '5px solid #8b0000';
+            }
+        })
         return;
     }
 
@@ -370,6 +381,7 @@ export class TodoList<T extends Todo> {
         this.listElement.replaceChildren(...this.todoElements);
         this.addEventListenersToAllElems();
         this.markCompleted(filtered);
+        this.flagHighImportance(filtered);
 
         return;
     }
@@ -390,9 +402,14 @@ export class TodoList<T extends Todo> {
             const elem: HTMLElement = itm.createElement();
             appendTaskDiv(this.listElement, elem);
             const elemName: HTMLElement = document.querySelector(`.todo-name-${itm.getTaskId()}`);
+            const elemdiv: HTMLElement = document.querySelector(`.todo-${itm.getTaskId()}`);
             if(itm.status === RenderStatus.Complete) {
                 elemName.style.textDecorationLine = 'line-through';
             }
+            if(itm.importance === Importance.High) {
+                elemdiv.style.borderLeft = '5px solid #8b0000';
+            }
+
             this.todoElements.push(elem)
         })
         return;
@@ -401,6 +418,13 @@ export class TodoList<T extends Todo> {
     createTaskElement(id: number): HTMLElement {
         const elem: HTMLElement = this.tasksMap.get(id).createElement();
         appendTaskDiv(this.listElement, elem);
+        console.log("TESTTTINGGG");
+        console.log(this.tasksMap.get(id).importance)
+        console.log(elem);
+
+        if(this.tasksMap.get(id).importance === Importance.High) {
+            elem.style.borderLeft = '5px solid #8b0000';
+        }
         this.todoElements.push(elem)
         return;
     }
