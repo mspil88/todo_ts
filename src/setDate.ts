@@ -2,7 +2,7 @@ let dayMap = new Map<string, string>([
     ["Mon", "Monday"],
     ["Tue", "Tueday"],
     ["Wed", "Wednesday"],
-    ["Thur", "Thursday"],
+    ["Thu", "Thursday"],
     ["Fri", "Friday"],
     ["Sat", "Saturday"],
     ["Sun", "Sunday"],
