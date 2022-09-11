@@ -46,6 +46,11 @@ enum BtnTypes {
     all = "all"
 }
 
+export function remainingDaysFromNow(date: string): number {
+    const now = new Date()
+    const taskDate = new Date(date)
+    return Math.abs(now.getDate() - taskDate.getDate());
+}
 
 
 //probably needs adding to the class

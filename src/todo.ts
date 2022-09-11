@@ -34,7 +34,7 @@
 //(1) add importance to app and color
 //(2) tool tips on each div
 
-import {createTaskElem, appendTaskDiv, addListener} from "./test";
+import {createTaskElem, appendTaskDiv, remainingDaysFromNow, addListener} from "./test";
 
 
 export enum Status {
@@ -57,7 +57,7 @@ export enum TaskAttribute {
 
 export class Todo {
     constructor(private id: number, public name: string, public status: string, public todoDate: string, 
-        public importance: string, public completeListener: EventListener = undefined,
+        public importance: string, public completeListener: EventListener = undefined, 
         public editListener: EventListener = undefined, public deleteListener: EventListener = undefined) {
             this.id = id;
             this.name = name;
@@ -170,7 +170,7 @@ export class TodoList<T extends Todo> {
     public remainingTodos: HTMLParagraphElement;
     private id;
 
-    constructor(tasks: T[], listElement: HTMLElement) {
+    constructor(listElement: HTMLElement) {
         this.tasksMap = new Map();
         this.listElement = listElement;
         this.todoElements = [];
@@ -194,6 +194,8 @@ export class TodoList<T extends Todo> {
             this.createTaskElement(id);
             this.addEventListenersToElem(this.todoElements[this.todoElements.length-1].getAttribute("class").split("-")[1]);
             this.setTasksInLocalStorage();
+
+            
         })
 
 
@@ -276,6 +278,8 @@ export class TodoList<T extends Todo> {
 
     addTask(taskName: string, taskDate: string, importance: string): number {
         const taskId = this.id.next().value
+
+        //@ts-ignore
         let task: Todo = new Todo(taskId, taskName, "InProgress", taskDate, importance);
         this.tasksMap.set(taskId, task);
         console.log(this.tasksMap);

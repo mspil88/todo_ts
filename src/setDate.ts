@@ -24,8 +24,8 @@ let monMap = new Map<string, string>([
 ])
 
 let prefixMap = new Map<string, string>([
-    ["1", "st"],
-    ["2", "nd"],
+    ["01", "st"],
+    ["02", "nd"],
     ["3", "rd"],
     ["21", "st"],
     ["22", "nd"],
